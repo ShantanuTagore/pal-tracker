@@ -9,10 +9,11 @@ import org.springframework.jdbc.support.KeyHolder;
 import javax.sql.DataSource;
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.List;
 
-public class JdbcTimeEntryRepository implements TimeEntryRepository{
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+
+public class JdbcTimeEntryRepository implements TimeEntryRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -20,42 +21,52 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository{
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-
     @Override
     public TimeEntry create(TimeEntry timeEntry) {
-        final String sqlQuery = "INSERT INTO time_entries (project_id, user_id, date, hours) VALUES (?,?,?,?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+        KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement statement = connection.prepareStatement(
+                "INSERT INTO time_entries (project_id, user_id, date, hours) " +
+                    "VALUES (?, ?, ?, ?)",
+                RETURN_GENERATED_KEYS
+            );
 
-                preparedStatement.setLong(1, timeEntry.getProjectId());
-                preparedStatement.setLong(2, timeEntry.getUserId());
-                preparedStatement.setDate(3, Date.valueOf(timeEntry.getDate()));
-                preparedStatement.setInt(4, timeEntry.getHours());
+            statement.setLong(1, timeEntry.getProjectId());
+            statement.setLong(2, timeEntry.getUserId());
+            statement.setDate(3, Date.valueOf(timeEntry.getDate()));
+            statement.setInt(4, timeEntry.getHours());
 
-                return preparedStatement;
-        }, keyHolder);
+            return statement;
+        }, generatedKeyHolder);
 
-        return find(keyHolder.getKey().longValue());
+        return find(generatedKeyHolder.getKey().longValue());
     }
 
     @Override
     public TimeEntry find(long id) {
-        return jdbcTemplate.query("SELECT id, project_id, user_id, date, hours FROM time_entries WHERE id = ?",
-                new Object[]{id}, extractor);
+        return jdbcTemplate.query(
+                "SELECT id, project_id, user_id, date, hours FROM time_entries WHERE id = ?",
+                new Object[]{id},
+                extractor);
     }
 
     @Override
     public List<TimeEntry> list() {
-        return jdbcTemplate.query("SELECT id, project_id, user_id, date, hours FROM time_entries",
-                rowMapper);
+        return jdbcTemplate.query("SELECT id, project_id, user_id, date, hours FROM time_entries", mapper);
     }
-
+    
     @Override
     public TimeEntry update(long id, TimeEntry timeEntry) {
-        final String sqlQuery = "UPDATE time_entries SET project_id = ? , user_id = ?, date = ?, hours = ? WHERE id = ?";
-        jdbcTemplate.update(sqlQuery, timeEntry.getProjectId(), timeEntry.getUserId(), Date.valueOf(timeEntry.getDate()), timeEntry.getHours(), id);
+        jdbcTemplate.update("UPDATE time_entries " +
+                "SET project_id = ?, user_id = ?, date = ?,  hours = ? " +
+                "WHERE id = ?",
+            timeEntry.getProjectId(),
+            timeEntry.getUserId(),
+            Date.valueOf(timeEntry.getDate()),
+            timeEntry.getHours(),
+            id);
+
         return find(id);
     }
 
@@ -64,15 +75,14 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository{
         jdbcTemplate.update("DELETE FROM time_entries WHERE id = ?", id);
     }
 
-    private final RowMapper<TimeEntry> rowMapper = (rs, rowNum) -> new TimeEntry(
-            rs.getLong("id"),
-            rs.getLong("project_id"),
-            rs.getLong("user_id"),
-            rs.getDate("date").toLocalDate(),
-            rs.getInt("hours")
+    private final RowMapper<TimeEntry> mapper = (rs, rowNum) -> new TimeEntry(
+        rs.getLong("id"),
+        rs.getLong("project_id"),
+        rs.getLong("user_id"),
+        rs.getDate("date").toLocalDate(),
+        rs.getInt("hours")
     );
 
     private final ResultSetExtractor<TimeEntry> extractor =
-            (rs) -> rs.next() ? rowMapper.mapRow(rs, 1) : null;
-
+        (rs) -> rs.next() ? mapper.mapRow(rs, 1) : null;
 }
