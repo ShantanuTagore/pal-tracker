@@ -15,10 +15,8 @@ jobs:
         java-version: 11
     - name: Create test database
       run: |
-        pwd
-        /etc/init.d/mysql start -uroot -proot
-        mysql --version
         mysql -uroot -proot < databases/tracker/create_databases.sql
+        ./gradlew testMigrate
     - name: Build with Gradle
       run: ./gradlew build
     - name: Publish artifact
@@ -68,7 +66,7 @@ jobs:
     - name: Migate tracker-database
       run: |
         cf login -a "$CF_API_URL" -o "$CF_ORG" -s "$CF_SPACE" -u "$CF_USERNAME" -p "$CF_PASSWORD"
-        scripts/migrate-databases.sh pal-tracker-st .
+        scripts/migrate-databases.sh pal-tracker .
       env:
         CF_API_URL: ${{ secrets.CF_API_URL }}
         CF_ORG: ${{ secrets.CF_ORG }}

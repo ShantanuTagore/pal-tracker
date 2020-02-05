@@ -79,7 +79,7 @@ public class JdbcTimeEntryRepositoryTest {
     @Test
     public void findReturnsNullWhenNotFound() {
         TimeEntry timeEntry = subject.find(999L);
-        System.out.println("shantanu" + timeEntry);
+
         assertThat(timeEntry).isNull();
     }
 
