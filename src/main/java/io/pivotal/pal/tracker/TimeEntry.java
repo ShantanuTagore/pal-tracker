@@ -37,6 +37,22 @@ public class TimeEntry {
         this.id = id;
     }
 
+    public long getProjectId() {
+        return projectId;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public int getHours() {
+        return hours;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -53,4 +69,17 @@ public class TimeEntry {
     public int hashCode() {
         return Objects.hash(id, projectId, userId, date, hours);
     }
+
+    @Override
+    public String toString() {
+        return "TimeEntry{" +
+                "id=" + id +
+                ", projectId=" + projectId +
+                ", userId=" + userId +
+                ", date=" + date +
+                ", hours=" + hours +
+                '}';
+    }
+
+
 }
