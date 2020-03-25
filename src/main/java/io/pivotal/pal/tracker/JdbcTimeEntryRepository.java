@@ -62,7 +62,6 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository{
     @Override
     public void delete(long id) {
         jdbcTemplate.update("DELETE FROM time_entries WHERE id = ?", id);
-
     }
 
     private final RowMapper<TimeEntry> rowMapper = (rs, rowNum) -> new TimeEntry(
