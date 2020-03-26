@@ -16,7 +16,7 @@ jobs:
     - name: Create test database
       run: |
         pwd
-        /etc/init.d/mysql -uroot -proot start
+        /etc/init.d/mysql start -uroot -proot
         mysql --version
         mysql -uroot -proot < databases/tracker/create_databases.sql
     - name: Build with Gradle
