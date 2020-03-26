@@ -15,6 +15,7 @@ jobs:
         java-version: 11
     - name: Create test database
       run: mysql --version
+            mysql -uroot -proot < databases/tracker/create_databases.sql
     - name: Build with Gradle
       run: ./gradlew build
     - name: Publish artifact
