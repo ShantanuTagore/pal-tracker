@@ -16,9 +16,9 @@ jobs:
     - name: Create test database
       run: |
         pwd
-        /etc/init.d/mysql start
+        /etc/init.d/mysql -uroot -proot start
         mysql --version
-        mysql -uroot < databases/tracker/create_databases.sql
+        mysql -uroot -proot < databases/tracker/create_databases.sql
     - name: Build with Gradle
       run: ./gradlew build
     - name: Publish artifact
