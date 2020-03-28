@@ -9,7 +9,7 @@ service_key="${4:-flyway-migration-key}"
 
 function main() {
 
-    echo "Creating service key, if necessary ..."
+    echo "Creating service key, if necessary .."
 
     cf create-service-key $service_name $service_key > /dev/null
 
