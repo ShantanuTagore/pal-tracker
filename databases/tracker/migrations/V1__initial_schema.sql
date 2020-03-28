@@ -1,4 +1,3 @@
-DROP TABLE time_entries;
 CREATE TABLE time_entries (
                               id         BIGINT NOT NULL AUTO_INCREMENT,
                               project_id BIGINT,
